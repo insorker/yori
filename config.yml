@@ -1,5 +1,7 @@
 # path should be the relative path of config.yml
 templates: templates
 static: static
-posts: posts
+categories:
+  - posts
+  - doc
 output: output

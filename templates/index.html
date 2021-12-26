@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}yori.insorker{% endblock %}
+{% set title='懒达' %}
 {% block head %}
     {{ super() }}
     <style type="text/css">
@@ -8,7 +8,7 @@
     </style>
 {% endblock %}
 {% block content %}
-    <h1>Index</h1>
+    <h1>{{ title }} の Homepage</h1>
     <p class="important">
       Welcome to my awesome homepage.
     </p>

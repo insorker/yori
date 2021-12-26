@@ -3,6 +3,10 @@ import yaml
 import markdown
 import os
 import time
+import shutil
+
+'''document'''
+DOCUMENT_URL = '...'
 
 '''markdown extensions'''
 MARKDOWN_EXTS = [
@@ -17,10 +21,33 @@ MARKDOWN_EXTS = [
 ]
 
 
-class Page:
-    def __init__(self, config, file):
-        self.file = file
+class PageBase:
+    def __init__(self):
         self.METADATA = {
+            ''' program generate '''
+            '__url': '',
+            '__content': '',
+            '__output_path': '',
+        }
+
+    def pagebase_render(self, env):
+        return jj2_render(self, env)
+
+    def pagebase_output(self, output_dir, env):
+        page_content = jj2_render(self, env)
+        page_output_path = os.path.join(output_dir, self.METADATA['__output_path'])
+
+        os.makedirs(os.path.dirname(page_output_path), exist_ok=True)
+        with open(page_output_path, 'w', encoding='utf-8') as f:
+            f.write(page_content)
+
+
+class Page(PageBase):
+    def __init__(self, config, file):
+        super(Page, self).__init__()
+
+        self.file = file
+        self.METADATA.update({
             ''' user define '''
             # file name default
             'title': '',
@@ -30,14 +57,8 @@ class Page:
             # 'render': True,
             # form recommended: %Y-%m-%d--%H-%M
             'date': '',
-            ''' program generate '''
-            '__url': '',
-            '__content': '',
-            '__output_path': '',
-        }
+        })
         self.METADATA.update(config)
-
-        self.page_render()
 
     def page_render(self):
         self.METADATA['__url'], self.METADATA['title'] = os.path.split(self.file)
@@ -79,10 +100,6 @@ class Page:
         return [], lines
 
 
-def jj2_render(page, env):
-    return env.get_template(page.METADATA['template']).render(page.METADATA)
-
-
 def file_get_recursive(root):
     files_rec = []
     files = os.listdir(root)
@@ -98,32 +115,51 @@ def file_get_recursive(root):
     return files_rec
 
 
+def jj2_render(page, env):
+    return env.get_template(page.METADATA['template']).render(page.METADATA)
+
+
+def index_render(output_dir, env):
+    index = PageBase()
+    index_metadata = {
+        'template': 'index.html',
+        '__output_path': 'index.html',
+    }
+    index.METADATA.update(index_metadata)
+    index.pagebase_render(env)
+    index.pagebase_output(output_dir, env)
+
+
 def yori_render(config: dict, env):
-    files = file_get_recursive(config['posts'])
+    index_render(config['output'], env)
 
-    for file in files:
-        try:
-            with open(config['templates'] + '\\_config.yml', 'r', encoding='utf-8') as _config_file:
-                _config = yaml.safe_load(_config_file)
-                page = Page(_config, file)
-        except FileNotFoundError:
-            print('File \"%s\\_config.yml\" cannot be found.' % config['templates'])
-            print('See ... for more information.')
+    for category in config['categories']:
+        if not os.path.exists(category):
+            print('Directory \"%s\" cannot be found.' % category)
+            print('See %s for more information.' % DOCUMENT_URL)
             continue
+        files = file_get_recursive(category)
 
-        page_content = jj2_render(page, env)
-        page_output_path = os.path.join(config['output'] + '\\', page.METADATA['__output_path'])
-
-        os.makedirs(os.path.dirname(page_output_path), exist_ok=True)
-        with open(page_output_path, 'w', encoding='utf-8') as f:
-            f.write(page_content)
+        for file in files:
+            try:
+                with open(config['templates'] + '\\_config.yml', 'r', encoding='utf-8') as _config_file:
+                    _config = yaml.safe_load(_config_file)
+                page = Page(_config, file)
+                page.page_render()
+                page.pagebase_output(config['output'] + '\\', env)
+            except FileNotFoundError:
+                print('File \"%s\\_config.yml\" cannot be found.' % config['templates'])
+                print('See %s for more information.' % DOCUMENT_URL)
+                continue
 
 
 if __name__ == "__main__":
     try:
         with open('config.yml', 'r', encoding='utf-8') as cfg_file:
             cfg = yaml.safe_load(cfg_file)
+        if os.path.exists(cfg['output']):
+            shutil.rmtree(cfg['output'])
         yori_render(cfg, Environment(loader=FileSystemLoader(cfg['templates'])))
     except FileNotFoundError:
         print('File \"config.yml\" cannot be found.')
-        print('See ... for more information.')
+        print('See %s for more information.' % DOCUMENT_URL)
