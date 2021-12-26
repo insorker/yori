@@ -1,0 +1,5 @@
+# path should be the relative path of config.yml
+templates: templates
+static: static
+posts: posts
+output: output
