@@ -6,6 +6,5 @@
 *.iml
 out
 gen
-# ignore user files and output
-posts/*
+# ignore output
 output/
