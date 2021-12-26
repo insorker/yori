@@ -4,6 +4,7 @@ import markdown
 import os
 import time
 import shutil
+import distutils.dir_util
 
 '''document'''
 DOCUMENT_URL = '...'
@@ -147,7 +148,6 @@ def yori_render(config: dict, env):
             page.page_render()
             page.pagebase_output(config['output'] + '/', env)
 
-            print(page.METADATA)
             GLOBAL_METADATA['__posts'].append(page.METADATA)
 
     index = PageBase(_config)
@@ -172,16 +172,13 @@ def yori_render(config: dict, env):
 
 
 def static_copy(static_dir, output_dir):
-    if os.path.exists(static_dir):
-        shutil.copytree(static_dir, output_dir)
+    distutils.dir_util.copy_tree(static_dir, output_dir)
 
 
 if __name__ == "__main__":
     try:
         with open('config.yml', 'r', encoding='utf-8') as cfg_file:
             cfg = yaml.safe_load(cfg_file)
-        if os.path.exists(cfg['output']):
-            shutil.rmtree(cfg['output'])
         static_copy(cfg['static'], cfg['output'])
         yori_render(cfg, Environment(loader=FileSystemLoader(cfg['templates'])))
     except FileNotFoundError:
