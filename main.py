@@ -6,7 +6,7 @@ import time
 import shutil
 
 '''document'''
-DOCUMENT_URL = '....'
+DOCUMENT_URL = '...'
 
 GLOBAL_METADATA = {
     '__links': [],
