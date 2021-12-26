@@ -10,3 +10,7 @@ date: 2021-12-26
 2. 第二点
 
 3. 第三点
+
+```python
+print('Hello World')
+```

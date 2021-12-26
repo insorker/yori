@@ -8,6 +8,11 @@ import shutil
 '''document'''
 DOCUMENT_URL = '...'
 
+GLOBAL_METADATA = {
+    '__links': [],
+    '__posts': [],
+}
+
 '''markdown extensions'''
 MARKDOWN_EXTS = [
     'markdown.extensions.extra',
@@ -22,13 +27,16 @@ MARKDOWN_EXTS = [
 
 
 class PageBase:
-    def __init__(self):
+    def __init__(self, config):
         self.METADATA = {
-            ''' program generate '''
+            'template': '',
+            'author': 'anonymous',
+            'date': time.strftime('%Y-%m-%d', time.localtime(time.time())),
             '__url': '',
             '__content': '',
             '__output_path': '',
         }
+        self.METADATA.update(config)
 
     def pagebase_render(self, env):
         return jj2_render(self, env)
@@ -44,34 +52,27 @@ class PageBase:
 
 class Page(PageBase):
     def __init__(self, config, file):
-        super(Page, self).__init__()
+        super(Page, self).__init__(config)
 
         self.file = file
         self.METADATA.update({
-            ''' user define '''
             # file name default
             'title': '',
             # post.html template default
             'template': 'post.html',
-            # render default
-            # 'render': True,
-            # form recommended: %Y-%m-%d--%H-%M
-            'date': '',
         })
-        self.METADATA.update(config)
 
     def page_render(self):
         self.METADATA['__url'], self.METADATA['title'] = os.path.split(self.file)
         self.METADATA['title'] = os.path.splitext(self.METADATA['title'])[0]
-        self.METADATA['date'] = time.strftime('%Y-%m-%d--%H-%M', time.localtime(time.time()))
+        self.METADATA['__url'] = self.METADATA['__url'].replace('\\', '/') + '/' + self.METADATA['title'] + '.html'
+        self.METADATA['__output_path'] = self.METADATA['__url']
 
         if self.file.endswith('md'):
             self.page_render_markdown()
         else:
             with open(self.file, 'r', encoding='utf-8') as f:
                 self.METADATA['__content'] = f.read()
-
-        self.METADATA['__output_path'] = self.METADATA['__url'] + '\\' + self.METADATA['title'] + '.html'
 
     def page_render_markdown(self):
         with open(self.file, 'r', encoding='utf-8') as f:
@@ -119,38 +120,60 @@ def jj2_render(page, env):
     return env.get_template(page.METADATA['template']).render(page.METADATA)
 
 
-def index_render(output_dir, env):
-    index = PageBase()
-    index_metadata = {
-        'template': 'index.html',
-        '__output_path': 'index.html',
-    }
-    index.METADATA.update(index_metadata)
-    index.pagebase_render(env)
-    index.pagebase_output(output_dir, env)
-
-
 def yori_render(config: dict, env):
-    index_render(config['output'], env)
+    try:
+        with open(config['templates'] + '/_config.yml', 'r', encoding='utf-8') as _config_file:
+            _config = yaml.safe_load(_config_file)
+    except FileNotFoundError:
+        print('File \"%s/_config.yml\" cannot be found.' % config['templates'])
+        print('See %s for more information.' % DOCUMENT_URL)
 
     for category in config['categories']:
         if not os.path.exists(category):
             print('Directory \"%s\" cannot be found.' % category)
             print('See %s for more information.' % DOCUMENT_URL)
             continue
+
         files = file_get_recursive(category)
+        GLOBAL_METADATA['__links'].append(
+            {
+                'name': category,
+                'url': category + '.html',
+            }
+        )
 
         for file in files:
-            try:
-                with open(config['templates'] + '\\_config.yml', 'r', encoding='utf-8') as _config_file:
-                    _config = yaml.safe_load(_config_file)
-                page = Page(_config, file)
-                page.page_render()
-                page.pagebase_output(config['output'] + '\\', env)
-            except FileNotFoundError:
-                print('File \"%s\\_config.yml\" cannot be found.' % config['templates'])
-                print('See %s for more information.' % DOCUMENT_URL)
-                continue
+            page = Page(_config, file)
+            page.page_render()
+            page.pagebase_output(config['output'] + '/', env)
+
+            print(page.METADATA)
+            GLOBAL_METADATA['__posts'].append(page.METADATA)
+
+    index = PageBase(_config)
+    index.METADATA.update({
+        'template': 'index.html',
+        '__url': 'index.html',
+        '__output_path': 'index.html',
+        '__links': GLOBAL_METADATA['__links'],
+    })
+    index.pagebase_render(env)
+    index.pagebase_output(config['output'], env)
+
+    gallery = PageBase(_config)
+    gallery.METADATA.update({
+        'template': 'gallery.html',
+        '__url': 'gallery.html',
+        '__output_path': 'gallery.html',
+        '__posts': GLOBAL_METADATA['__posts'],
+    })
+    gallery.pagebase_render(env)
+    gallery.pagebase_output(config['output'], env)
+
+
+def static_copy(static_dir, output_dir):
+    if os.path.exists(static_dir):
+        shutil.copytree(static_dir, output_dir)
 
 
 if __name__ == "__main__":
@@ -159,6 +182,7 @@ if __name__ == "__main__":
             cfg = yaml.safe_load(cfg_file)
         if os.path.exists(cfg['output']):
             shutil.rmtree(cfg['output'])
+        static_copy(cfg['static'], cfg['output'])
         yori_render(cfg, Environment(loader=FileSystemLoader(cfg['templates'])))
     except FileNotFoundError:
         print('File \"config.yml\" cannot be found.')

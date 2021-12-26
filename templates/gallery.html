@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% set title='Gallery' %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .brief { color: #336699; }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>{{ title }} ( ᐛ )( ᐛ )( ᐛ )</h1>
+    <div class="brief">作者：{{ author }}</div>
+    <div class="brief">日期：{{ date }}</div>
+
+    <ul>
+    {% for post in __posts %}
+        <li><p>{{ post.date }} <a href={{ post.__url }}>{{ post.title }}</a></p></li>
+    {% endfor %}
+    </ul>
+{% endblock %}

@@ -2,6 +2,6 @@
 templates: templates
 static: static
 categories:
-  - posts
+  - gallery
   - doc
 output: output
