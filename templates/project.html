@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% set title='Projects' %}
+{% block content %}
+    <div class="content-header">
+        <div class="post-title">
+            <h1>{{ title }}</h1>
+        </div>
+        <div class="post-meta">
+            <span>{{ author }}</span>
+            <span> | Posted on {{ date }}</span>
+        </div>
+
+        <div class>
+            <p>To your valor, and my old friend Yorn!
+                <br /> Long may the sun shine!</p>
+        </div>
+
+        <div>
+        {% for project in __projects %}
+            <div class="card">
+                {{ project.__content }}
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+{% endblock %}
