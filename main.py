@@ -2,8 +2,9 @@ from jinja2 import Environment, FileSystemLoader
 import yaml
 import markdown
 import os
-import time
+from datetime import datetime
 import distutils.dir_util
+import operator
 
 '''document'''
 DOCUMENT_URL = 'https://insorker.github.io/'
@@ -30,7 +31,7 @@ class PageBase:
     def __init__(self, config):
         self.METADATA = {
             'author': 'anonymous',
-            'date': time.strftime('%Y-%m-%d', time.localtime(time.time())),
+            'date': datetime.now().strftime("%Y-%m-%d"),
             'template': '',
             '__url': '',
             '__content': '',
@@ -85,6 +86,13 @@ class Page(PageBase):
             for key, value in yaml_header.items():
                 if key in self.METADATA:
                     self.METADATA[key] = value
+
+        # ==BUG== 2021-1-1 will be converted into <class 'datetime.date'>
+        self.METADATA['date'] = str(self.METADATA['date'])
+        try:
+            datetime.strptime(self.METADATA['date'], "%Y-%m-%d")
+        except ValueError:
+            self.METADATA['date'] = datetime.now().strftime("%Y-%m-%d")
 
         self.METADATA['__content'] = markdown.markdown(''.join(content_lines), extensions=MARKDOWN_EXTS)
 
@@ -144,12 +152,15 @@ def yori_render(config: dict, env):
         )
         GLOBAL_METADATA['__posts_metadata'].setdefault(category, [])
 
+        page_metadate = []
         for file in files:
             page = Page(_config, file)
             page.page_render()
             page.pagebase_output(config['output'] + '/', env)
 
-            GLOBAL_METADATA['__posts_metadata'][category].append(page.METADATA)
+            page_metadate.append(page.METADATA)
+        GLOBAL_METADATA['__posts_metadata'][category] = sorted(page_metadate,
+                                                               key=operator.itemgetter('date'))
 
     index = PageBase(_config)
     index.METADATA.update({

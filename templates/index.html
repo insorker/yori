@@ -15,7 +15,7 @@
 
     <ul>
     {% for link in __links %}
-        <li><p><a href={{ link.url }}>{{ link.name }}</a></p></li>
+        <li><p><a href="{{ link.url }}">{{ link.name }}</a></p></li>
     {% endfor %}
     </ul>
 {% endblock %}
