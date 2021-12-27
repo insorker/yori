@@ -3,5 +3,5 @@ templates: templates
 static: static
 categories:
   - gallery
-  - doc
+  - project
 output: output

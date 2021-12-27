@@ -2,18 +2,21 @@
 
 {% block head %}
 {{ super() }}
-    <style type="text/css">
-        .brief { color: #336699; }
-    </style>
     <link href="/css/prism.css" rel="stylesheet" />
 {% endblock%}
 
 {% block content %}
-<h1>{{ title }}</h1>
-<div class="brief">作者：{{ author }}</div>
-<div class="brief">日期：{{ date }}</div>
-<div>{{ __content }}</div>
-{{ super() }}
+    <div class="content-header">
+        <div class="post-title">
+            <h1>{{ title }}</h1>
+        </div>
+        <div class="post-meta">
+            <span>{{ author }}</span>
+            <span> | Posted on {{ date }}</span>
+        </div>
+    </div>
+    <div>{{ __content }}</div>
+    {{ super() }}
 {% endblock%}
 
 {% block script%}

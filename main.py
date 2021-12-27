@@ -3,15 +3,14 @@ import yaml
 import markdown
 import os
 import time
-import shutil
 import distutils.dir_util
 
 '''document'''
-DOCUMENT_URL = '...'
+DOCUMENT_URL = 'https://insorker.github.io/'
 
 GLOBAL_METADATA = {
     '__links': [],
-    '__posts': [],
+    '__posts_metadata': {},
 }
 
 '''markdown extensions'''
@@ -30,9 +29,9 @@ MARKDOWN_EXTS = [
 class PageBase:
     def __init__(self, config):
         self.METADATA = {
-            'template': '',
             'author': 'anonymous',
             'date': time.strftime('%Y-%m-%d', time.localtime(time.time())),
+            'template': '',
             '__url': '',
             '__content': '',
             '__output_path': '',
@@ -59,17 +58,18 @@ class Page(PageBase):
         self.METADATA.update({
             # file name default
             'title': '',
+            # 'tag': '',
             # post.html template default
             'template': 'post.html',
         })
 
-    def page_render(self):
         self.METADATA['__url'], self.METADATA['title'] = os.path.split(self.file)
         self.METADATA['title'] = os.path.splitext(self.METADATA['title'])[0]
         self.METADATA['__url'] = self.METADATA['__url'].replace('\\', '/') + '/' + self.METADATA['title'] + '.html'
         self.METADATA['__output_path'] = self.METADATA['__url']
 
-        if self.file.endswith('md'):
+    def page_render(self):
+        if self.file.endswith('.md'):
             self.page_render_markdown()
         else:
             with open(self.file, 'r', encoding='utf-8') as f:
@@ -83,11 +83,10 @@ class Page(PageBase):
         if yaml_lines:
             yaml_header = yaml.safe_load(''.join(yaml_lines))
             for key, value in yaml_header.items():
-                if key in self.METADATA and key[0: 2] != '--':
+                if key in self.METADATA:
                     self.METADATA[key] = value
 
-        self.METADATA['__content'] = ''.join(content_lines)
-        self.METADATA['__content'] = markdown.markdown(self.METADATA['__content'], extensions=MARKDOWN_EXTS)
+        self.METADATA['__content'] = markdown.markdown(''.join(content_lines), extensions=MARKDOWN_EXTS)
 
     @staticmethod
     def split_markdown(lines: [str]) -> ([], [str]):
@@ -102,7 +101,7 @@ class Page(PageBase):
         return [], lines
 
 
-def file_get_recursive(root):
+def file_get_recursive(root: str) -> [str]:
     files_rec = []
     files = os.listdir(root)
 
@@ -117,7 +116,7 @@ def file_get_recursive(root):
     return files_rec
 
 
-def jj2_render(page, env):
+def jj2_render(page: PageBase, env):
     return env.get_template(page.METADATA['template']).render(page.METADATA)
 
 
@@ -136,19 +135,21 @@ def yori_render(config: dict, env):
             continue
 
         files = file_get_recursive(category)
+
         GLOBAL_METADATA['__links'].append(
             {
                 'name': category,
                 'url': category + '.html',
             }
         )
+        GLOBAL_METADATA['__posts_metadata'].setdefault(category, [])
 
         for file in files:
             page = Page(_config, file)
             page.page_render()
             page.pagebase_output(config['output'] + '/', env)
 
-            GLOBAL_METADATA['__posts'].append(page.METADATA)
+            GLOBAL_METADATA['__posts_metadata'][category].append(page.METADATA)
 
     index = PageBase(_config)
     index.METADATA.update({
@@ -165,10 +166,20 @@ def yori_render(config: dict, env):
         'template': 'gallery.html',
         '__url': 'gallery.html',
         '__output_path': 'gallery.html',
-        '__posts': GLOBAL_METADATA['__posts'],
+        '__posts': GLOBAL_METADATA['__posts_metadata']['gallery'],
     })
     gallery.pagebase_render(env)
     gallery.pagebase_output(config['output'], env)
+
+    project = PageBase(_config)
+    project.METADATA.update({
+        'template': 'project.html',
+        '__url': 'project.html',
+        '__output_path': 'project.html',
+        '__projects': GLOBAL_METADATA['__posts_metadata']['project'],
+    })
+    project.pagebase_render(env)
+    project.pagebase_output(config['output'], env)
 
 
 def static_copy(static_dir, output_dir):
@@ -179,8 +190,9 @@ if __name__ == "__main__":
     try:
         with open('config.yml', 'r', encoding='utf-8') as cfg_file:
             cfg = yaml.safe_load(cfg_file)
-        static_copy(cfg['static'], cfg['output'])
-        yori_render(cfg, Environment(loader=FileSystemLoader(cfg['templates'])))
     except FileNotFoundError:
         print('File \"config.yml\" cannot be found.')
         print('See %s for more information.' % DOCUMENT_URL)
+
+    static_copy(cfg['static'], cfg['output'])
+    yori_render(cfg, Environment(loader=FileSystemLoader(cfg['templates'])))

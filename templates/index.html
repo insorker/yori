@@ -1,17 +1,18 @@
 {% extends "base.html" %}
 
 {% set title='懒达' %}
-{% block head %}
-    {{ super() }}
-    <style type="text/css">
-        .brief { color: #336699; }
-    </style>
-{% endblock %}
 {% block content %}
-    <h1>{{ title }} の Homepage</h1>
-    <p class="brief">
-      Welcome to my awesome homepage.
-    </p>
+    <div class="content-header">
+        <div class="post-title">
+            <h1>{{ title }} の Homepage</h1>
+        </div>
+        <div class="post-meta">
+            <span>Welcome to {{ title }} の homepage.</span>
+            <br />
+            <span>Example: <a href="https://insorker.github.io">insorker.github.io/</a></span>
+        </div>
+    </div>
+
     <ul>
     {% for link in __links %}
         <li><p><a href={{ link.url }}>{{ link.name }}</a></p></li>
