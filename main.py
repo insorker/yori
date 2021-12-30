@@ -101,7 +101,8 @@ class Page(PageBase):
         if not lines:
             return [], ['']
 
-        if lines[0] == '---\n':
+        if len(lines[0]) == 4 and lines[0] == '---\n' \
+                or len(lines[0]) == 5 and lines[0][1:] == '---\n':
             for idx in range(1, len(lines)):
                 if lines[idx] == '---\n':
                     return lines[1: idx], lines[idx + 1:]
