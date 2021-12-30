@@ -101,10 +101,10 @@ class Page(PageBase):
         if not lines:
             return [], ['']
 
-        if len(lines[0]) == 4 and lines[0] == '---\n' \
-                or len(lines[0]) == 5 and lines[0][1:] == '---\n':
+        if len(lines[0]) == 4 and lines[0].replace('\n', '') == '---' \
+                or len(lines[0]) == 5 and lines[0][1:].replace('\n', '') == '---':
             for idx in range(1, len(lines)):
-                if lines[idx] == '---\n':
+                if lines[idx].replace('\n', '') == '---':
                     return lines[1: idx], lines[idx + 1:]
 
         return [], lines
