@@ -161,7 +161,8 @@ def yori_render(config: dict, env):
 
             page_metadate.append(page.METADATA)
         GLOBAL_METADATA['__posts_metadata'][category] = sorted(page_metadate,
-                                                               key=operator.itemgetter('date'))
+                                                               key=operator.itemgetter('date'),
+                                                               reverse=True)
 
     index = PageBase(_config)
     index.METADATA.update({
