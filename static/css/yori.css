@@ -4,28 +4,49 @@ body {
     padding: 1em;
     color: #333;
     line-height: 1.5;
-    font-size: 16px;
+    font-size: 18px;
     font-family: 'Lato', "Georgia", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+h1, h2, h3 {
+    border-bottom: 2px solid #a24482;
 }
 h1, h2, h3, h4, h5, h6 {
     margin: 20px 0 15px;
     padding: 0;
-    font-weight: bold;
+    font-weight: 500px;
+    color: #a24482;
 }
 img {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
 }
+a:link {
+    text-decoration: none;
+    color: #2775b6;
+}
+a:visited {
+    text-decoration: none;
+    color: #2775b6;
+}
+a:hover, a:focus {
+    text-decoration: underline;
+    outline: none;
+}
+a:active {
+    color: #F9A825;
+}
 .post-title {
+    margin: 20px 0 15px;
+    padding: 0;
     color: #444;
-    font-size: 24px;
+    font-size: 32px;
     text-align: center;
     word-break: break-word;
-    font-weight: 400;
+    font-weight: 800px;
 }
 .post-meta {
-    margin: 3px 0 60px 0;
+    margin: 3px 0 20px 0;
     color: #777;
     font-family: 'Lato', "Georgia", "PingFang SC", "Microsoft YaHei", sans-serif;
     font-size: 14px;
@@ -33,13 +54,13 @@ img {
 }
 .card {
     margin: 20px auto;
-    padding: 20px;
+    padding: 5px 20px 20px;
     box-shadow: 0 2px 2px 0 rgb(0 0 0 / 12%), 0 3px 1px -2px rgb(0 0 0 / 6%), 0 1px 5px 0 rgb(0 0 0 / 12%);
     border-radius: 10px 10px 10px 10px;
 }
 blockquote {
-    background: none;
-    border-left: 3px solid #e2dfdf;
+    background: #f7e7e7;
+    border-left: 6px solid #f1939c;
     border-right: none;
     border-top: none;
     border-bottom: none;

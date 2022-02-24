@@ -19,6 +19,7 @@ MARKDOWN_EXTS = [
     'markdown.extensions.toc',
     'markdown.extensions.codehilite',
     'markdown.extensions.nl2br',
+    'markdown.extensions.sane_lists',
     'pymdownx.extra',
     'pymdownx.magiclink',
     'pymdownx.keys',
