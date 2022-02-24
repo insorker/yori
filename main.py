@@ -16,8 +16,10 @@ GLOBAL_METADATA = {
 
 '''markdown extensions'''
 MARKDOWN_EXTS = [
-    'markdown.extensions.extra',
     'markdown.extensions.toc',
+    'markdown.extensions.codehilite',
+    'markdown.extensions.nl2br',
+    'pymdownx.extra',
     'pymdownx.magiclink',
     'pymdownx.keys',
     'pymdownx.mark',
