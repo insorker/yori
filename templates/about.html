@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+    <link href="/css/prism.css" rel="stylesheet" />
+{% endblock%}
+
+{% block content %}
+    <div class="content-header">
+        <div class="post-title">
+            {{ title }}
+        </div>
+        <div class="post-meta">
+            <span>{{ author }}</span>
+            <span> | Updated on {{ date }}</span>
+        </div>
+    </div>
+    <div>{{ __content }}</div>
+    {{ super() }}
+{% endblock%}
+
+{% block script%}
+{{ super() }}
+    <script src="/js/prism.js"></script>
+{% endblock%}

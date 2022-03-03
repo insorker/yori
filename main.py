@@ -65,7 +65,10 @@ class Page(PageBase):
             # 'tag': '',
             # post.html template default
             'template': 'post.html',
+            # folder name default
+            'category': 'default',
         })
+        self.METADATA.update(config)
 
         self.METADATA['__url'], self.METADATA['title'] = os.path.split(self.file)
         self.METADATA['title'] = os.path.splitext(self.METADATA['title'])[0]
@@ -158,6 +161,12 @@ def yori_render(config: dict, env):
 
         page_metadate = []
         for file in files:
+            # ==BUG== I'm not satisfied with this method
+            if len(file.split('\\')) >= 3:
+                _config['category'] = file.split('\\')[1]
+            else:
+                _config['category'] = 'default'
+
             page = Page(_config, file)
             page.page_render()
             page.pagebase_output(config['output'] + '/', env)
@@ -167,35 +176,55 @@ def yori_render(config: dict, env):
                                                                key=operator.itemgetter('date'),
                                                                reverse=True)
 
-    index = PageBase(_config)
-    index.METADATA.update({
+    index_page = PageBase(_config)
+    index_page.METADATA.update({
         'template': 'index.html',
         '__url': 'index.html',
         '__output_path': 'index.html',
         '__links': GLOBAL_METADATA['__links'],
     })
-    index.pagebase_render(env)
-    index.pagebase_output(config['output'], env)
+    index_page.pagebase_render(env)
+    index_page.pagebase_output(config['output'], env)
 
-    gallery = PageBase(_config)
-    gallery.METADATA.update({
+    gallery_page = PageBase(_config)
+    gallery_page.METADATA.update({
         'template': 'gallery.html',
         '__url': 'gallery.html',
         '__output_path': 'gallery.html',
         '__posts': GLOBAL_METADATA['__posts_metadata']['gallery'],
     })
-    gallery.pagebase_render(env)
-    gallery.pagebase_output(config['output'], env)
+    gallery_page.pagebase_render(env)
+    gallery_page.pagebase_output(config['output'], env)
 
-    project = PageBase(_config)
-    project.METADATA.update({
+    project_page = PageBase(_config)
+    project_page.METADATA.update({
         'template': 'project.html',
         '__url': 'project.html',
         '__output_path': 'project.html',
         '__projects': GLOBAL_METADATA['__posts_metadata']['project'],
     })
-    project.pagebase_render(env)
-    project.pagebase_output(config['output'], env)
+    project_page.pagebase_render(env)
+    project_page.pagebase_output(config['output'], env)
+
+    # building...
+    # category_page = PageBase(_config)
+    # category_page.METADATA.update({
+    #     'template': 'category.html',
+    #     '__url': 'category.html',
+    #     '__output_path': 'category.html',
+    #     '__projects': GLOBAL_METADATA['__posts_metadata']['gallery'],
+    # })
+    # category_page.pagebase_render(env)
+    # category_page.pagebase_output(config['output'], env)
+
+    about_page = Page(_config, 'about/about.md')
+    about_page.METADATA.update({
+        'template': 'about.html',
+        '__url': 'about.html',
+        '__output_path': 'about.html',
+    })
+    about_page.page_render()
+    about_page.pagebase_output(config['output'] + '/', env)
 
 
 def static_copy(static_dir, output_dir):
