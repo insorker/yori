@@ -143,21 +143,21 @@ def yori_render(config: dict, env):
         print('File \"%s/_config.yml\" cannot be found.' % config['templates'])
         print('See %s for more information.' % DOCUMENT_URL)
 
-    for category in config['categories']:
-        if not os.path.exists(category):
-            print('Directory \"%s\" cannot be found.' % category)
+    for entry in config['entries']:
+        if not os.path.exists(entry):
+            print('Directory \"%s\" cannot be found.' % entry)
             print('See %s for more information.' % DOCUMENT_URL)
             continue
 
-        files = file_get_recursive(category)
+        files = file_get_recursive(entry)
 
         GLOBAL_METADATA['__links'].append(
             {
-                'name': category,
-                'url': category + '.html',
+                'name': entry,
+                'url': entry + '.html',
             }
         )
-        GLOBAL_METADATA['__posts_metadata'].setdefault(category, [])
+        GLOBAL_METADATA['__posts_metadata'].setdefault(entry, [])
 
         page_metadate = []
         for file in files:
@@ -172,9 +172,9 @@ def yori_render(config: dict, env):
             page.pagebase_output(config['output'] + '/', env)
 
             page_metadate.append(page.METADATA)
-        GLOBAL_METADATA['__posts_metadata'][category] = sorted(page_metadate,
-                                                               key=operator.itemgetter('date'),
-                                                               reverse=True)
+        GLOBAL_METADATA['__posts_metadata'][entry] = sorted(page_metadate,
+                                                            key=operator.itemgetter('date'),
+                                                            reverse=True)
 
     index_page = PageBase(_config)
     index_page.METADATA.update({
@@ -206,16 +206,15 @@ def yori_render(config: dict, env):
     project_page.pagebase_render(env)
     project_page.pagebase_output(config['output'], env)
 
-    # building...
-    # category_page = PageBase(_config)
-    # category_page.METADATA.update({
-    #     'template': 'category.html',
-    #     '__url': 'category.html',
-    #     '__output_path': 'category.html',
-    #     '__projects': GLOBAL_METADATA['__posts_metadata']['gallery'],
-    # })
-    # category_page.pagebase_render(env)
-    # category_page.pagebase_output(config['output'], env)
+    category_page = PageBase(_config)
+    category_page.METADATA.update({
+        'template': 'category.html',
+        '__url': 'category.html',
+        '__output_path': 'category.html',
+        '__posts': GLOBAL_METADATA['__posts_metadata']['gallery'],
+    })
+    category_page.pagebase_render(env)
+    category_page.pagebase_output(config['output'], env)
 
     about_page = Page(_config, 'about/about.md')
     about_page.METADATA.update({
