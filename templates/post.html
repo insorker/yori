@@ -1,24 +1,4 @@
-{% extends "base.html" %}
-
-{% block head %}
-{{ super() }}
-    <link rel="stylesheet" href="/css/github-markdown.min.css">
-    <style type="text/css">
-        .markdown-body {
-            box-sizing: border-box;
-            min-width: 200px;
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 45px;
-        }
-
-        @media (max-width: 767px) {
-            .markdown-body {
-                padding: 15px;
-            }
-        }
-    </style>
-{% endblock%}
+{% extends "postbase.html" %}
 
 {% block content %}
     <div class="content-header">
@@ -27,7 +7,7 @@
         </div>
         <div class="post-meta">
             <span>{{ author }}</span>
-            <span> | Posted on {{ date }}</span>
+            <span> | posted on {{ date }}</span>
         </div>
     </div>
     <div class="markdown-body">

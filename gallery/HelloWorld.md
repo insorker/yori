@@ -15,12 +15,17 @@ date: 2021-12-26
 
 3. 终极 Hello World
 
-   - Hello
+- Hello
 
 - World
 
 ```python
 print("Hello World")
+```
+
+```c
+#include <stdio.h>
+int main() { printf("Hello World"); return 0; }
 ```
 
 > Hello World

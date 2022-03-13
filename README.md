@@ -41,29 +41,28 @@ To generate output, you should run
 python main.py
 ```
 
-> !!! The next content (until the end) has not been updated, please watch carefully
-
 ### Use config.yml
 
 ```yaml
 # path should be the relative path of config.yml
 templates: templates
 static: static
-categories:
+entries:
   - gallery
-  - doc
+  - project
+  - about
 output: output
 ```
 
 - templates:
-  - where to load your html templates
+  - folder where to load your html templates
 
 - static:
-  - css/js
+  - css and img and js
 
-- categories:
-  - each category corresponds to a folder where you can do what you want.
-  - Like gallery, you can put your posts there.
+- entries:
+  - each entry corresponds to a folder where you can place your articles or do something else
+  - Like gallery, you can put your posts there
 - output:
   - output the results after `python main.py`
 
@@ -73,7 +72,7 @@ By default, you can write articles under folder named "gallery". If you want to 
 
 Also, you can mkdir like a tree, and create a path like `posts/your_category_name/.../your_category_name/your_article_name`.
 
-If you want to do more things rather than just writing, mkdir folder at the same level of the folder "gallery" and name it yourself. Remember to add the name into config.yml's categories.
+If you want to do more things rather than just writing, mkdir at the same level of the folder "gallery" and name it yourself. Remember to add the name in config.yml's entries.
 
 ### Config template
 

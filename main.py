@@ -75,35 +75,48 @@ class Page(PageBase):
         self.METADATA['__url'] = self.METADATA['__url'].replace('\\', '/') + '/' + self.METADATA['title'] + '.html'
         self.METADATA['__output_path'] = self.METADATA['__url']
 
-    def page_render(self):
+    def page_set_template(self, template):
+        self.METADATA.update({
+            'template': template,
+        })
+
+    def page_render_default(self):
         if self.file.endswith('.md'):
             self.page_render_markdown()
         else:
             with open(self.file, 'r', encoding='utf-8') as f:
                 self.METADATA['__content'] = f.read()
 
-    def page_render_markdown(self):
-        with open(self.file, 'r', encoding='utf-8') as f:
+    def page_render_markdown(self, raw=False):
+        content_lines = Page.render_markdown_yaml(self.file, self.METADATA)
+        if raw:
+            self.METADATA['__content'] = ''.join(content_lines)
+        else:
+            self.METADATA['__content'] = markdown.markdown(''.join(content_lines), extensions=MARKDOWN_EXTS)
+
+    @staticmethod
+    def render_markdown_yaml(file, metadata):
+        with open(file, 'r', encoding='utf-8') as f:
             lines = f.readlines()
-        yaml_lines, content_lines = Page.split_markdown(lines)
+        yaml_lines, content_lines = Page.split_markdown_yaml(lines)
 
         if yaml_lines:
             yaml_header = yaml.safe_load(''.join(yaml_lines))
             for key, value in yaml_header.items():
-                if key in self.METADATA:
-                    self.METADATA[key] = value
+                if key in metadata:
+                    metadata[key] = value
 
         # ==BUG== 2021-1-1 will be converted into <class 'datetime.date'>
-        self.METADATA['date'] = str(self.METADATA['date'])
+        metadata['date'] = str(metadata['date'])
         try:
-            datetime.strptime(self.METADATA['date'], "%Y-%m-%d")
+            datetime.strptime(metadata['date'], "%Y-%m-%d")
         except ValueError:
-            self.METADATA['date'] = datetime.now().strftime("%Y-%m-%d")
+            metadata['date'] = datetime.now().strftime("%Y-%m-%d")
 
-        self.METADATA['__content'] = markdown.markdown(''.join(content_lines), extensions=MARKDOWN_EXTS)
+        return content_lines
 
     @staticmethod
-    def split_markdown(lines: [str]) -> ([], [str]):
+    def split_markdown_yaml(lines: [str]) -> ([], [str]):
         if not lines:
             return [], ['']
 
@@ -168,8 +181,13 @@ def yori_render(config: dict, env):
                 _config['category'] = 'default'
 
             page = Page(_config, file)
-            page.page_render()
-            page.pagebase_output(config['output'] + '/', env)
+            if entry == 'gallery':
+                page.page_render_default()
+                page.pagebase_output(config['output'] + '/', env)
+            elif entry == 'slide':
+                page.page_set_template('reveal.html')
+                page.page_render_markdown(raw=True)
+                page.pagebase_output(config['output'] + '/', env)
 
             page_metadate.append(page.METADATA)
         GLOBAL_METADATA['__posts_metadata'][entry] = sorted(page_metadate,
@@ -206,15 +224,26 @@ def yori_render(config: dict, env):
     project_page.pagebase_render(env)
     project_page.pagebase_output(config['output'], env)
 
-    category_page = PageBase(_config)
-    category_page.METADATA.update({
-        'template': 'category.html',
-        '__url': 'category.html',
-        '__output_path': 'category.html',
-        '__posts': GLOBAL_METADATA['__posts_metadata']['gallery'],
+    slide_page = PageBase(_config)
+    slide_page.METADATA.update({
+        'template': 'slide.html',
+        '__url': 'slide.html',
+        '__output_path': 'slide.html',
+        '__slides': GLOBAL_METADATA['__posts_metadata']['slide'],
     })
-    category_page.pagebase_render(env)
-    category_page.pagebase_output(config['output'], env)
+    slide_page.pagebase_render(env)
+    slide_page.pagebase_output(config['output'], env)
+
+    # ==building==
+    # category_page = PageBase(_config)
+    # category_page.METADATA.update({
+    #     'template': 'category.html',
+    #     '__url': 'category.html',
+    #     '__output_path': 'category.html',
+    #     '__posts': GLOBAL_METADATA['__posts_metadata']['gallery'],
+    # })
+    # category_page.pagebase_render(env)
+    # category_page.pagebase_output(config['output'], env)
 
     about_page = Page(_config, 'about/about.md')
     about_page.METADATA.update({
@@ -222,7 +251,7 @@ def yori_render(config: dict, env):
         '__url': 'about.html',
         '__output_path': 'about.html',
     })
-    about_page.page_render()
+    about_page.page_render_default()
     about_page.pagebase_output(config['output'] + '/', env)
 
 

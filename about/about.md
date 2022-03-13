@@ -2,6 +2,13 @@
 
 ## 更新记录
 
+**2022.3.12**：
+
+- 更改markdown为github-markdown.css
+- 更改markdown代码高亮为highlight.js
+- 更改font-family
+- 更新README.md
+
 **2022.3.3**：
 
 - 添加关于界面

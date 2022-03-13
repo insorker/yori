@@ -4,5 +4,6 @@ static: static
 entries:
   - gallery
   - project
+  - slide
   - about
 output: output
