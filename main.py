@@ -43,10 +43,10 @@ class PageBase:
         self.METADATA.update(config)
 
     def pagebase_render(self, env):
-        return jj2_render(self, env)
+        return env.get_template(self.METADATA['template']).render(self.METADATA)
 
     def pagebase_output(self, output_dir, env):
-        page_content = jj2_render(self, env)
+        page_content = self.pagebase_render(env)
         page_output_path = os.path.join(output_dir, self.METADATA['__output_path'])
 
         os.makedirs(os.path.dirname(page_output_path), exist_ok=True)
@@ -144,10 +144,6 @@ def file_get_recursive(root: str) -> [str]:
     return files_rec
 
 
-def jj2_render(page: PageBase, env):
-    return env.get_template(page.METADATA['template']).render(page.METADATA)
-
-
 def yori_render(config: dict, env):
     try:
         with open(config['templates'] + '/_config.yml', 'r', encoding='utf-8') as _config_file:
@@ -201,7 +197,6 @@ def yori_render(config: dict, env):
         '__output_path': 'index.html',
         '__links': GLOBAL_METADATA['__links'],
     })
-    index_page.pagebase_render(env)
     index_page.pagebase_output(config['output'], env)
 
     gallery_page = PageBase(_config)
@@ -211,7 +206,6 @@ def yori_render(config: dict, env):
         '__output_path': 'gallery.html',
         '__posts': GLOBAL_METADATA['__posts_metadata']['gallery'],
     })
-    gallery_page.pagebase_render(env)
     gallery_page.pagebase_output(config['output'], env)
 
     project_page = PageBase(_config)
@@ -221,7 +215,6 @@ def yori_render(config: dict, env):
         '__output_path': 'project.html',
         '__projects': GLOBAL_METADATA['__posts_metadata']['project'],
     })
-    project_page.pagebase_render(env)
     project_page.pagebase_output(config['output'], env)
 
     slide_page = PageBase(_config)
@@ -231,7 +224,6 @@ def yori_render(config: dict, env):
         '__output_path': 'slide.html',
         '__slides': GLOBAL_METADATA['__posts_metadata']['slide'],
     })
-    slide_page.pagebase_render(env)
     slide_page.pagebase_output(config['output'], env)
 
     # ==building==
@@ -242,7 +234,6 @@ def yori_render(config: dict, env):
     #     '__output_path': 'category.html',
     #     '__posts': GLOBAL_METADATA['__posts_metadata']['gallery'],
     # })
-    # category_page.pagebase_render(env)
     # category_page.pagebase_output(config['output'], env)
 
     about_page = Page(_config, 'about/about.md')

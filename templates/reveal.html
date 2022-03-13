@@ -15,12 +15,27 @@
 
 	<!-- Theme used for syntax highlighted code -->
 	<link rel="stylesheet" href="/revealjs/plugin/highlight/github.min.css">
+
+	<style type="text/css">
+		.reveal p {
+			text-align: left;
+		}
+		.reveal ul {
+			display: block;
+		}
+		.reveal ol {
+			display: block;
+		}
+		a {
+			border: none;
+		}
+	</style>
 </head>
 <body>
 	<div class="reveal">
 		<div class="slides">
 			<section data-markdown
-					 data-separator-vertical="\|">
+					 data-separator-vertical="^\|\|\|">
 				<textarea data-template>
 {% block content %}
 {{ __content }}
@@ -40,6 +55,13 @@
 		// - https://revealjs.com/config/
 		Reveal.initialize({
 			hash: true,
+			progress: false,
+			center: false,
+			slideNumber: 'c/t',
+			autoAnimateUnmatched: true,
+			autoAnimateEasing: 'ease-out',
+			autoAnimateDuration: 0.3,
+			transitionSpeed: 'fast',
 
 			// Learn about plugins: https://revealjs.com/plugins/
 			plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
