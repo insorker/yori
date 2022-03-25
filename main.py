@@ -177,12 +177,13 @@ def yori_render(config: dict, env):
                 _config['category'] = 'default'
 
             page = Page(_config, file)
-            if entry == 'gallery':
-                page.page_render_default()
-                page.pagebase_output(config['output'] + '/', env)
-            elif entry == 'slide':
+
+            if entry == 'slide':
                 page.page_set_template('reveal.html')
                 page.page_render_markdown(raw=True)
+                page.pagebase_output(config['output'] + '/', env)
+            else:
+                page.page_render_default()
                 page.pagebase_output(config['output'] + '/', env)
 
             page_metadate.append(page.METADATA)
