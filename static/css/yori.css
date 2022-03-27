@@ -42,6 +42,13 @@ a:active {
     font-size: 14px;
     text-align: center;
 }
+.footer-line {
+    margin: 3px 0px 0px;
+    color: #777;
+    font-size: 14px;
+    text-align: center;
+    position:relative;
+}
 .card {
     margin: 20px auto;
     padding: 5px 20px 20px;
