@@ -67,6 +67,8 @@ class Page(PageBase):
             'template': 'post.html',
             # folder name default
             'category': 'default',
+            # 是否置顶
+            'top': 0,
         })
         self.METADATA.update(config)
 
@@ -187,8 +189,9 @@ def yori_render(config: dict, env):
                 page.pagebase_output(config['output'] + '/', env)
 
             page_metadate.append(page.METADATA)
+        # sorted by top and date
         GLOBAL_METADATA['__posts_metadata'][entry] = sorted(page_metadate,
-                                                            key=operator.itemgetter('date'),
+                                                            key=operator.itemgetter('top', 'date'),
                                                             reverse=True)
 
     index_page = PageBase(_config)
