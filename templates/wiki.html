@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% set title='Slide' %}
+{% set title='Wiki' %}
 {% block content %}
     <div class="content-header">
         <div class="post-title">
-            {{ title }} ( ᐛ )( ᐛ )( ᐛ )
+            {{ title }} RTFM
         </div>
         <div class="post-meta">
             <span>{{ author }}</span>
@@ -12,8 +12,8 @@
         </div>
 
         <ul>
-        {% for slide in __slides %}
-            <li><p>{{ slide.date }} | <a href="{{ slide.__url }}">{{ slide.title }}</a></p></li>
+        {% for wiki in __wikis %}
+            <li><p><a href="{{ wiki.__url }}">{{ wiki.title }}</a></p></li>
         {% endfor %}
         </ul>
     </div>

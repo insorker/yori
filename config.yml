@@ -6,4 +6,6 @@ entries:
   - project
   - slide
   - about
+entry-wiki:
+  - wiki
 output: output

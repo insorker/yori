@@ -7,7 +7,7 @@ import distutils.dir_util
 import operator
 
 '''document'''
-DOCUMENT_URL = 'https://insorker.github.io/'
+DOCUMENT_URL = 'https://github.com/insorker/yori'
 
 GLOBAL_METADATA = {
     '__links': [],
@@ -86,8 +86,9 @@ class Page(PageBase):
         if self.file.endswith('.md'):
             self.page_render_markdown()
         else:
-            with open(self.file, 'r', encoding='utf-8') as f:
-                self.METADATA['__content'] = f.read()
+            self.page_render_markdown(True)
+            # with open(self.file, 'r', encoding='utf-8') as f:
+            #     self.METADATA['__content'] = f.read()
 
     def page_render_markdown(self, raw=False):
         content_lines = Page.render_markdown_yaml(self.file, self.METADATA)
@@ -129,6 +130,13 @@ class Page(PageBase):
                     return lines[1: idx], lines[idx + 1:]
 
         return [], lines
+
+
+class Wiki(PageBase):
+    def __init__(self, config, entry, file):
+        super(Wiki, self).__init__(config)
+        self.METADATA['title'] = file
+        self.METADATA['__url'] = entry + '/' + file + '/index.html'
 
 
 def file_get_recursive(root: str) -> [str]:
@@ -194,6 +202,18 @@ def yori_render(config: dict, env):
                                                             key=operator.itemgetter('top', 'date'),
                                                             reverse=True)
 
+    for entry in config['entry-wiki']:
+        if not os.path.exists(entry):
+            print('Directory \"%s\" cannot be found.' % entry)
+            print('See %s for more information.' % DOCUMENT_URL)
+            continue
+
+        page_metadate = []
+        for file in os.listdir(entry):
+            wiki = Wiki(_config, entry, file)
+            page_metadate.append(wiki.METADATA)
+        GLOBAL_METADATA['__posts_metadata'][entry] = page_metadate
+
     index_page = PageBase(_config)
     index_page.METADATA.update({
         'template': 'index.html',
@@ -220,6 +240,15 @@ def yori_render(config: dict, env):
         '__projects': GLOBAL_METADATA['__posts_metadata']['project'],
     })
     project_page.pagebase_output(config['output'], env)
+
+    wiki_page = PageBase(_config)
+    wiki_page.METADATA.update({
+        'template': 'wiki.html',
+        '__url': 'wiki.html',
+        '__output_path': 'wiki.html',
+        '__wikis': GLOBAL_METADATA['__posts_metadata']['wiki'],
+    })
+    wiki_page.pagebase_output(config['output'], env)
 
     slide_page = PageBase(_config)
     slide_page.METADATA.update({
@@ -264,3 +293,5 @@ if __name__ == "__main__":
 
     static_copy(cfg['static'], cfg['output'])
     yori_render(cfg, Environment(loader=FileSystemLoader(cfg['templates'])))
+
+    print("Yori( ᐛ )( ᐛ )( ᐛ )...done!")
