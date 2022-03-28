@@ -208,6 +208,14 @@ def yori_render(config: dict, env):
             print('See %s for more information.' % DOCUMENT_URL)
             continue
 
+        GLOBAL_METADATA['__links'].append(
+            {
+                'name': entry,
+                'url': entry + '.html',
+            }
+        )
+        GLOBAL_METADATA['__posts_metadata'].setdefault(entry, [])
+
         page_metadate = []
         for file in os.listdir(entry):
             wiki = Wiki(_config, entry, file)
