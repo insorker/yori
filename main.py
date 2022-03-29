@@ -299,7 +299,11 @@ if __name__ == "__main__":
         print('File \"config.yml\" cannot be found.')
         print('See %s for more information.' % DOCUMENT_URL)
 
-    static_copy(cfg['static'], cfg['output'])
+    for static_files in cfg['static']:
+        static_copy(static_files, cfg['output'])
+    # ==BUG MAYBE== copy wiki to output, can't merge with static_files
+    static_copy('wiki', cfg['output'] + '/wiki')
+
     yori_render(cfg, Environment(loader=FileSystemLoader(cfg['templates'])))
 
     print("Yori( ᐛ )( ᐛ )( ᐛ )...done!")

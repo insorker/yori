@@ -1,6 +1,7 @@
 # path should be the relative path of config.yml
 templates: templates
-static: static
+static:
+  - static
 entries:
   - gallery
   - project
