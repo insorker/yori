@@ -249,15 +249,6 @@ def yori_render(config: dict, env):
     })
     project_page.pagebase_output(config['output'], env)
 
-    wiki_page = PageBase(_config)
-    wiki_page.METADATA.update({
-        'template': 'wiki.html',
-        '__url': 'wiki.html',
-        '__output_path': 'wiki.html',
-        '__wikis': GLOBAL_METADATA['__posts_metadata']['wiki'],
-    })
-    wiki_page.pagebase_output(config['output'], env)
-
     slide_page = PageBase(_config)
     slide_page.METADATA.update({
         'template': 'slide.html',
@@ -266,6 +257,15 @@ def yori_render(config: dict, env):
         '__slides': GLOBAL_METADATA['__posts_metadata']['slide'],
     })
     slide_page.pagebase_output(config['output'], env)
+
+    wiki_page = PageBase(_config)
+    wiki_page.METADATA.update({
+        'template': 'wiki.html',
+        '__url': 'wiki.html',
+        '__output_path': 'wiki.html',
+        '__wikis': GLOBAL_METADATA['__posts_metadata']['wiki'],
+    })
+    wiki_page.pagebase_output(config['output'], env)
 
     # ==building==
     # category_page = PageBase(_config)
