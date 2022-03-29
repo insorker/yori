@@ -303,6 +303,7 @@ if __name__ == "__main__":
         static_copy(static_files, cfg['output'])
     # ==BUG MAYBE== copy wiki to output, can't merge with static_files
     static_copy('wiki', cfg['output'] + '/wiki')
+    static_copy('.nojekyll', cfg['output'])
 
     yori_render(cfg, Environment(loader=FileSystemLoader(cfg['templates'])))
 
