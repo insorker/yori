@@ -2,8 +2,4 @@
 
 ## 更新记录
 
-已迁移至wiki
-
-# 关于我
-
-很宅，喜欢围棋、像素画和折纸（
+已迁移至[wiki](https://insorker.github.io/wiki/yori/index.html#/%E6%9B%B4%E6%96%B0)
