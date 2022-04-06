@@ -1,143 +1,18 @@
 from jinja2 import Environment, FileSystemLoader
 import yaml
-import markdown
 import os
-from datetime import datetime
+import sys
 import distutils.dir_util
 import distutils.file_util
 import operator
+import http.server
+import socketserver
+import entrypage_generator as eg
+import global_metadata as gm
+from page_generator import Page, Wiki
 
 '''document'''
 DOCUMENT_URL = 'https://github.com/insorker/yori'
-
-GLOBAL_METADATA = {
-    '__links': [],
-    '__posts_metadata': {},
-}
-
-'''markdown extensions'''
-MARKDOWN_EXTS = [
-    'markdown.extensions.toc',
-    'markdown.extensions.codehilite',
-    'markdown.extensions.nl2br',
-    'markdown.extensions.sane_lists',
-    'pymdownx.extra',
-    'pymdownx.magiclink',
-    'pymdownx.keys',
-    'pymdownx.mark',
-    'pymdownx.tilde',
-    'pymdownx.inlinehilite',
-    'pymdownx.tasklist',
-]
-
-
-class PageBase:
-    def __init__(self, config):
-        self.METADATA = {
-            'author': 'anonymous',
-            'date': datetime.now().strftime("%Y-%m-%d"),
-            'template': '',
-            '__url': '',
-            '__content': '',
-            '__output_path': '',
-        }
-        self.METADATA.update(config)
-
-    def pagebase_render(self, env):
-        return env.get_template(self.METADATA['template']).render(self.METADATA)
-
-    def pagebase_output(self, output_dir, env):
-        page_content = self.pagebase_render(env)
-        page_output_path = os.path.join(output_dir, self.METADATA['__output_path'])
-
-        os.makedirs(os.path.dirname(page_output_path), exist_ok=True)
-        with open(page_output_path, 'w', encoding='utf-8') as f:
-            f.write(page_content)
-
-
-class Page(PageBase):
-    def __init__(self, config, file):
-        super(Page, self).__init__(config)
-
-        self.file = file
-        self.METADATA.update({
-            # file name default
-            'title': '',
-            # 'tag': '',
-            # post.html template default
-            'template': 'post.html',
-            # folder name default
-            'category': 'default',
-            # 是否置顶
-            'top': 0,
-        })
-        self.METADATA.update(config)
-
-        self.METADATA['__url'], self.METADATA['title'] = os.path.split(self.file)
-        self.METADATA['title'] = os.path.splitext(self.METADATA['title'])[0]
-        self.METADATA['__url'] = self.METADATA['__url'].replace('\\', '/') + '/' + self.METADATA['title'] + '.html'
-        self.METADATA['__output_path'] = self.METADATA['__url']
-
-    def page_set_template(self, template):
-        self.METADATA.update({
-            'template': template,
-        })
-
-    def page_render_default(self):
-        if self.file.endswith('.md'):
-            self.page_render_markdown()
-        else:
-            self.page_render_markdown(True)
-            # with open(self.file, 'r', encoding='utf-8') as f:
-            #     self.METADATA['__content'] = f.read()
-
-    def page_render_markdown(self, raw=False):
-        content_lines = Page.render_markdown_yaml(self.file, self.METADATA)
-        if raw:
-            self.METADATA['__content'] = ''.join(content_lines)
-        else:
-            self.METADATA['__content'] = markdown.markdown(''.join(content_lines), extensions=MARKDOWN_EXTS)
-
-    @staticmethod
-    def render_markdown_yaml(file, metadata):
-        with open(file, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-        yaml_lines, content_lines = Page.split_markdown_yaml(lines)
-
-        if yaml_lines:
-            yaml_header = yaml.safe_load(''.join(yaml_lines))
-            for key, value in yaml_header.items():
-                if key in metadata:
-                    metadata[key] = value
-
-        # ==BUG== 2021-1-1 will be converted into <class 'datetime.date'>
-        metadata['date'] = str(metadata['date'])
-        try:
-            datetime.strptime(metadata['date'], "%Y-%m-%d")
-        except ValueError:
-            metadata['date'] = datetime.now().strftime("%Y-%m-%d")
-
-        return content_lines
-
-    @staticmethod
-    def split_markdown_yaml(lines: [str]) -> ([], [str]):
-        if not lines:
-            return [], ['']
-
-        if len(lines[0]) == 4 and lines[0].replace('\n', '') == '---' \
-                or len(lines[0]) == 5 and lines[0][1:].replace('\n', '') == '---':
-            for idx in range(1, len(lines)):
-                if lines[idx].replace('\n', '') == '---':
-                    return lines[1: idx], lines[idx + 1:]
-
-        return [], lines
-
-
-class Wiki(PageBase):
-    def __init__(self, config, entry, file):
-        super(Wiki, self).__init__(config)
-        self.METADATA['title'] = file
-        self.METADATA['__url'] = entry + '/' + file + '/index.html'
 
 
 def file_get_recursive(root: str) -> [str]:
@@ -169,23 +44,18 @@ def yori_render(config: dict, env):
             print('See %s for more information.' % DOCUMENT_URL)
             continue
 
+        gm.add_index_links(entry)
+
+        # page_metadata of entry
+        posts_metadata = []
+        # files in entry folder
         files = file_get_recursive(entry)
-
-        GLOBAL_METADATA['__links'].append(
-            {
-                'name': entry,
-                'url': entry + '.html',
-            }
-        )
-        GLOBAL_METADATA['__posts_metadata'].setdefault(entry, [])
-
-        page_metadate = []
         for file in files:
             # ==BUG== I'm not satisfied with this method
-            if len(file.split('\\')) >= 3:
-                _config['category'] = file.split('\\')[1]
-            else:
-                _config['category'] = 'default'
+            # if len(file.split('\\')) >= 3:
+            #     _config['category'] = file.split('\\')[1]
+            # else:
+            #     _config['category'] = 'default'
 
             page = Page(_config, file)
 
@@ -197,11 +67,10 @@ def yori_render(config: dict, env):
                 page.page_render_default()
                 page.pagebase_output(config['output'] + '/', env)
 
-            page_metadate.append(page.METADATA)
+            posts_metadata.append(page.METADATA)
         # sorted by top and date
-        GLOBAL_METADATA['__posts_metadata'][entry] = sorted(page_metadate,
-                                                            key=operator.itemgetter('top', 'date'),
-                                                            reverse=True)
+        gm.add_posts_metadata(entry, sorted(posts_metadata,
+                                            key=operator.itemgetter('top', 'date'), reverse=True))
 
     for entry in config['entry-wiki']:
         if not os.path.exists(entry):
@@ -209,87 +78,29 @@ def yori_render(config: dict, env):
             print('See %s for more information.' % DOCUMENT_URL)
             continue
 
-        GLOBAL_METADATA['__links'].append(
-            {
-                'name': entry,
-                'url': entry + '.html',
-            }
-        )
-        GLOBAL_METADATA['__posts_metadata'].setdefault(entry, [])
+        gm.add_index_links(entry)
 
-        page_metadate = []
+        posts_metadata = []
         for file in os.listdir(entry):
             wiki = Wiki(_config, entry, file)
-            page_metadate.append(wiki.METADATA)
-        GLOBAL_METADATA['__posts_metadata'][entry] = page_metadate
 
-    index_page = PageBase(_config)
-    index_page.METADATA.update({
-        'template': 'index.html',
-        '__url': 'index.html',
-        '__output_path': 'index.html',
-        '__links': GLOBAL_METADATA['__links'],
-    })
-    index_page.pagebase_output(config['output'], env)
+            posts_metadata.append(wiki.METADATA)
+        gm.add_posts_metadata(entry, posts_metadata)
 
-    gallery_page = PageBase(_config)
-    gallery_page.METADATA.update({
-        'template': 'gallery.html',
-        '__url': 'gallery.html',
-        '__output_path': 'gallery.html',
-        '__posts': GLOBAL_METADATA['__posts_metadata']['gallery'],
-    })
-    gallery_page.pagebase_output(config['output'], env)
-
-    project_page = PageBase(_config)
-    project_page.METADATA.update({
-        'template': 'project.html',
-        '__url': 'project.html',
-        '__output_path': 'project.html',
-        '__projects': GLOBAL_METADATA['__posts_metadata']['project'],
-    })
-    project_page.pagebase_output(config['output'], env)
-
-    slide_page = PageBase(_config)
-    slide_page.METADATA.update({
-        'template': 'slide.html',
-        '__url': 'slide.html',
-        '__output_path': 'slide.html',
-        '__slides': GLOBAL_METADATA['__posts_metadata']['slide'],
-    })
-    slide_page.pagebase_output(config['output'], env)
-
-    wiki_page = PageBase(_config)
-    wiki_page.METADATA.update({
-        'template': 'wiki.html',
-        '__url': 'wiki.html',
-        '__output_path': 'wiki.html',
-        '__wikis': GLOBAL_METADATA['__posts_metadata']['wiki'],
-    })
-    wiki_page.pagebase_output(config['output'], env)
-
-    # ==building==
-    # category_page = PageBase(_config)
-    # category_page.METADATA.update({
-    #     'template': 'category.html',
-    #     '__url': 'category.html',
-    #     '__output_path': 'category.html',
-    #     '__posts': GLOBAL_METADATA['__posts_metadata']['gallery'],
-    # })
-    # category_page.pagebase_output(config['output'], env)
-
-    about_page = Page(_config, 'about/about.md')
-    about_page.METADATA.update({
-        'template': 'about.html',
-        '__url': 'about.html',
-        '__output_path': 'about.html',
-    })
-    about_page.page_render_default()
-    about_page.pagebase_output(config['output'] + '/', env)
+    eg.gen_indexpage(config, _config, env)
+    eg.gen_gallerypage(config, _config, env)
+    eg.gen_projectpage(config, _config, env)
+    eg.gen_slidepage(config, _config, env)
+    eg.gen_wikipage(config, _config, env)
+    eg.gen_aboutpage(config, _config, env)
 
 
-def static_copy(static_dir, output_dir):
+def static_dir_copy(static_dir, output_dir):
     distutils.dir_util.copy_tree(static_dir, output_dir)
+
+
+def static_file_copy(static_file, output_dir):
+    distutils.file_util.copy_file(static_file, output_dir)
 
 
 if __name__ == "__main__":
@@ -301,12 +112,20 @@ if __name__ == "__main__":
         print('See %s for more information.' % DOCUMENT_URL)
 
     for static_files in cfg['static']:
-        static_copy(static_files, cfg['output'])
-    # ==BUG MAYBE== copy wiki to output, can't merge with static_files
-    static_copy('wiki', cfg['output'] + '/wiki')
-    # ==BUG MAYBE== copy .nojekyll
-    distutils.file_util.copy_file('.nojekyll', cfg['output'])
+        static_dir_copy(static_files, cfg['output'])
+    static_dir_copy('wiki', cfg['output'] + '/wiki')
+    static_file_copy('.nojekyll', cfg['output'])
 
     yori_render(cfg, Environment(loader=FileSystemLoader(cfg['templates'])))
 
     print("Yori( ᐛ )( ᐛ )( ᐛ )...done!")
+
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'server':
+            port = 8000
+            handl = http.server.SimpleHTTPRequestHandler
+
+            with socketserver.TCPServer(('127.0.0.1', port), handl) as httpd:
+                os.chdir(cfg['output'])
+                print('web site at localhost:8000')
+                httpd.serve_forever()
