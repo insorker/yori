@@ -25,6 +25,7 @@ class PageBase:
             'author': 'anonymous',
             'date': datetime.now().strftime("%Y-%m-%d"),
             'template': '',
+            '__identification': 0.0,
             '__url': '',
             '__content': '',
             '__output_path': '',
@@ -61,6 +62,7 @@ class Page(PageBase):
         })
         self.METADATA.update(config)
 
+        self.METADATA['__identification'] = os.path.getctime(self.file)
         self.METADATA['__url'], self.METADATA['title'] = os.path.split(self.file)
         self.METADATA['title'] = os.path.splitext(self.METADATA['title'])[0]
         self.METADATA['__url'] = self.METADATA['__url'].replace('\\', '/') + '/' + self.METADATA['title'] + '.html'

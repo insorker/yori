@@ -4,6 +4,7 @@
 {{ super() }}
     <link rel="stylesheet" href="/css/github-markdown.min.css">
     <link rel="stylesheet" href="/css/github.min.css">
+    <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
     <style type="text/css">
         .markdown-body {
             box-sizing: border-box;
@@ -25,4 +26,17 @@
 {{ super() }}
     <script src="/js/highlight.min.js"></script>
     <script>hljs.highlightAll();</script>
+    <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+    <script>
+        var gitment = new Gitment({
+            id: {{ __identification }},
+            owner: 'insorker',
+            repo: 'insorker.github.io',
+            oauth: {
+                client_id: '1c8b8a648872fb4b06e5',
+                client_secret: 'e7aa56cb8653e89050195484e973f5de0cb46781',
+            },
+        })
+        gitment.render('comment')
+    </script>
 {% endblock %}

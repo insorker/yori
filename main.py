@@ -7,7 +7,7 @@ import distutils.file_util
 import operator
 import http.server
 import socketserver
-import entrypage_generator as eg
+import entry_generator as eg
 import global_metadata as gm
 from page_generator import Page, Wiki
 
