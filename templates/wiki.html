@@ -11,7 +11,7 @@
             <span> | updated on {{ date }}</span>
         </div>
 
-        <ul>
+        <ul class="link-list">
         {% for wiki in __wikis %}
             <li><p><a href="{{ wiki.__url }}">{{ wiki.title }}</a></p></li>
         {% endfor %}

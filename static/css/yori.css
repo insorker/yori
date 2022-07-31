@@ -12,19 +12,22 @@ img {
     height: auto;
     border-radius: 8px;
 }
-a:link {
+.link-list a {
     text-decoration: none;
     color: #2775b6;
+    /* https://css-irl.info/animating-underlines/ */
+    background:
+        linear-gradient(to right, rgba(100, 200, 200, 0), rgba(100, 200, 200, 0)),
+        linear-gradient(to right, rgba(255, 0, 0, 1), rgba(255, 0, 180, 1), rgba(0, 100, 200, 1));
+    background-size: 100% 0.1em, 0 0.1em;
+    background-position: 100% 100%, 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 400ms;
 }
-a:visited {
-    text-decoration: none;
-    color: #2775b6;
+.link-list a:hover, .link-list a:focus {
+    background-size: 0 0.1em, 100% 0.1em;
 }
-a:hover, a:focus {
-    text-decoration: underline;
-    outline: none;
-}
-a:active {
+.link-list a:active {
     color: #F9A825;
 }
 .post-title {

@@ -11,7 +11,7 @@
             <span> | updated on {{ date }}</span>
         </div>
 
-        <ul>
+        <ul class="link-list">
         {% for slide in __slides %}
             <li><p>{{ slide.date }} | <a href="{{ slide.__url }}">{{ slide.title }}</a></p></li>
         {% endfor %}
