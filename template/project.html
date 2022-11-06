@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% set title='Projects' %}
+{% block content %}
+    <div class="content-header">
+        <h1 class="post-title">
+            {{ title }}
+        </h1>
+        <div class="post-meta">
+            <span>{{ author }}</span>
+            <span> | updated on {{ date }}</span>
+        </div>
+
+        <div class>
+            <p>相信自己的心就是你的魔法</p>
+        </div>
+
+        <div>
+        {% for project in __info %}
+            <div class="card">
+                {{ project.__content }}
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+{% endblock %}

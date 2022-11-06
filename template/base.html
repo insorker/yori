@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico" />
+    <link href="/css/yori.css" rel="stylesheet" />
+    {% endblock %}
+</head>
+<body>
+    <div class="navbar" style="display:flex;justify-content:space-between;">
+        {% block navbar %}
+<!--        test-->
+        <a href="/index.html" style="text-decoration:none;"><span>懒达</span></a>
+        <a href="/index.html" style="text-decoration:none;"><span>HOME</span></a>
+        {% endblock%}
+    </div>
+    <div class="container">
+        <div id="content">
+            {% block content %}
+            {% endblock %}
+        </div>
+        <div id="footer">
+            {% block footer %}
+            {% endblock %}
+        </div>
+        {% block script %}
+        {% endblock%}
+    </div>
+</body>
+</html>

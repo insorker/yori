@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+    <link rel="stylesheet" href="/css/github-markdown.min.css">
+    <link rel="stylesheet" href="/css/github.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <style type="text/css">
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
+
+        @media (max-width: 767px) {
+            .markdown-body {
+                padding: 15px;
+            }
+        }
+    </style>
+{% endblock%}
+
+{% block script %}
+{{ super() }}
+    <script src="/js/highlight.min.js"></script>
+    <script>hljs.highlightAll()</script>
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+    <script>
+        const gitalk = new Gitalk({
+            clientID: '1c8b8a648872fb4b06e5',
+            clientSecret: 'e7aa56cb8653e89050195484e973f5de0cb46781',
+            repo: 'insorker.github.io', // The repository of store comments,
+            owner: 'insorker',
+            admin: ['insorker'],
+            id: '{{ __id }}',           // Ensure uniqueness and length less than 50
+            distractionFreeMode: false  // Facebook-like distraction free mode
+        })
+        gitalk.render('gitalk-container')
+    </script>
+{% endblock %}

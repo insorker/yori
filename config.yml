@@ -1,12 +1,8 @@
 # path should be the relative path of config.yml
-templates: templates
+template: template
 static:
   - static
-entries:
-  - gallery
+navigation:
+  - post
   - project
-  - slide
-  - about
-entry-wiki:
-  - wiki
 output: output
